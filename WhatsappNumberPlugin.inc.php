@@ -50,7 +50,9 @@ class WhatsappNumberPlugin extends GenericPlugin {
 			HookRegistry::register('submissionsubmitstep1form::validate', array($this, 'validateSubmissionStep1Field'));
 			HookRegistry::register('SubmissionHandler::saveSubmit', array($this, 'saveSubmissionMetadataField'));
 			HookRegistry::register('Submission::edit', array($this, 'persistWhatsappNumberOnSubmissionEdit'));
+			HookRegistry::register('Submission::validate', array($this, 'validateSubmissionWhatsappNumber'));
 			HookRegistry::register('Publication::edit', array($this, 'persistWhatsappNumberOnPublicationEdit'));
+			HookRegistry::register('Publication::validate', array($this, 'validatePublicationWhatsappNumber'));
 			HookRegistry::register('Template::Workflow::Publication', array($this, 'addWorkflowPublicationTab'));
 			HookRegistry::register('Schema::get::submission', array($this, 'addSubmissionSchema'));
 			HookRegistry::register('Schema::get::publication', array($this, 'addPublicationSchema'));
@@ -97,10 +99,13 @@ class WhatsappNumberPlugin extends GenericPlugin {
 		}
 
 		$request = Application::get()->getRequest();
-		$whatsappNumber = trim((string) $request->getUserVar('whatsappNumber'));
-		$this->setPendingWhatsappNumber($request, $whatsappNumber);
-		if ($whatsappNumber === '') {
+		$parsedWhatsappNumber = $this->parseWhatsappNumber($request->getUserVar('whatsappNumber'));
+		$this->setPendingWhatsappNumber($request, $parsedWhatsappNumber['value']);
+		if ($parsedWhatsappNumber['value'] === null) {
 			$form->addError('whatsappNumber', 'plugins.generic.whatsappNumber.fieldRequired');
+			$form->addErrorField('whatsappNumber');
+		} elseif (!$parsedWhatsappNumber['isValid']) {
+			$form->addError('whatsappNumber', 'plugins.generic.whatsappNumber.fieldInvalid');
 			$form->addErrorField('whatsappNumber');
 		}
 
@@ -132,6 +137,16 @@ class WhatsappNumberPlugin extends GenericPlugin {
 	}
 
 	/**
+	 * Validate WhatsApp number for submission API writes.
+	 */
+	function validateSubmissionWhatsappNumber($hookName, $args) {
+		$errors =& $args[0];
+		$props =& $args[2];
+		$this->validateWhatsappNumberProps($errors, $props);
+		return false;
+	}
+
+	/**
 	 * Persist WhatsApp number after the first publication is attached to a new submission.
 	 */
 	function persistWhatsappNumberOnSubmissionEdit($hookName, $params) {
@@ -155,6 +170,16 @@ class WhatsappNumberPlugin extends GenericPlugin {
 			$newSubmission->setData('whatsappNumber', $whatsappNumber);
 		}
 
+		return false;
+	}
+
+	/**
+	 * Validate WhatsApp number for publication API writes.
+	 */
+	function validatePublicationWhatsappNumber($hookName, $args) {
+		$errors =& $args[0];
+		$props =& $args[2];
+		$this->validateWhatsappNumberProps($errors, $props);
 		return false;
 	}
 
@@ -417,13 +442,16 @@ class WhatsappNumberPlugin extends GenericPlugin {
 			return null;
 		}
 
-		$rawWhatsappNumber = $request->getUserVar('whatsappNumber');
-		if ($allowMissing && $rawWhatsappNumber === null) {
+		$parsedWhatsappNumber = $this->parseWhatsappNumber($request->getUserVar('whatsappNumber'), $allowMissing);
+		if ($allowMissing && $parsedWhatsappNumber['isMissing']) {
 			return null;
 		}
 
-		$whatsappNumber = trim((string) $rawWhatsappNumber);
-		return $whatsappNumber === '' ? null : $whatsappNumber;
+		if (!$parsedWhatsappNumber['isValid']) {
+			return null;
+		}
+
+		return $parsedWhatsappNumber['value'];
 	}
 
 	private function getWhatsappNumberForPersistence($request, $allowMissing = false) {
@@ -460,7 +488,7 @@ class WhatsappNumberPlugin extends GenericPlugin {
 			return;
 		}
 
-		$session->setSessionVar('whatsappNumber.pending', trim((string) $whatsappNumber));
+		$session->setSessionVar('whatsappNumber.pending', $whatsappNumber);
 	}
 
 	private function clearPendingWhatsappNumber($request) {
@@ -472,5 +500,68 @@ class WhatsappNumberPlugin extends GenericPlugin {
 		if ($session) {
 			$session->unsetSessionVar('whatsappNumber.pending');
 		}
+	}
+
+	private function validateWhatsappNumberProps(&$errors, &$props) {
+		if (!array_key_exists('whatsappNumber', $props)) {
+			return;
+		}
+
+		$parsedWhatsappNumber = $this->parseWhatsappNumber($props['whatsappNumber']);
+		if ($parsedWhatsappNumber['value'] === null) {
+			return;
+		}
+
+		if (!$parsedWhatsappNumber['isValid']) {
+			$errors['whatsappNumber'] = [__('plugins.generic.whatsappNumber.fieldInvalid')];
+			return;
+		}
+
+		$props['whatsappNumber'] = $parsedWhatsappNumber['value'];
+	}
+
+	private function parseWhatsappNumber($rawWhatsappNumber, $allowMissing = false) {
+		if ($allowMissing && $rawWhatsappNumber === null) {
+			return [
+				'value' => null,
+				'isMissing' => true,
+				'isValid' => true,
+			];
+		}
+
+		$rawWhatsappNumber = trim((string) $rawWhatsappNumber);
+		if ($rawWhatsappNumber === '') {
+			return [
+				'value' => null,
+				'isMissing' => false,
+				'isValid' => true,
+			];
+		}
+
+		if (!preg_match('/^\+?[0-9\s().-]+$/', $rawWhatsappNumber) || strpos(substr($rawWhatsappNumber, 1), '+') !== false) {
+			return [
+				'value' => $rawWhatsappNumber,
+				'isMissing' => false,
+				'isValid' => false,
+			];
+		}
+
+		$hasLeadingPlus = strpos($rawWhatsappNumber, '+') === 0;
+		$digitsOnly = preg_replace('/[^0-9]/', '', $rawWhatsappNumber);
+		$normalizedWhatsappNumber = $hasLeadingPlus ? '+' . $digitsOnly : $digitsOnly;
+
+		if (!preg_match('/^\+?[0-9]{8,20}$/', $normalizedWhatsappNumber)) {
+			return [
+				'value' => $normalizedWhatsappNumber,
+				'isMissing' => false,
+				'isValid' => false,
+			];
+		}
+
+		return [
+			'value' => $normalizedWhatsappNumber,
+			'isMissing' => false,
+			'isValid' => true,
+		];
 	}
 }
