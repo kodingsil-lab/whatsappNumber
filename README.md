@@ -13,6 +13,20 @@ Nomor WhatsApp:
 - tidak ditampilkan di frontend artikel
 - tidak dimaksudkan sebagai metadata publik artikel
 
+## Preview
+
+### Form Submission
+
+Tambahkan screenshot ke file `docs/preview-submission.png`
+
+![Preview Form Submission](docs/preview-submission.png)
+
+### Tab Workflow Editor
+
+Tambahkan screenshot ke file `docs/preview-workflow.png`
+
+![Preview Tab Workflow Editor](docs/preview-workflow.png)
+
 ## Struktur Penyimpanan
 
 Penyimpanan utama menggunakan `submission_settings` dengan key `whatsappNumber`.
