@@ -104,10 +104,10 @@ class WhatsappNumberPlugin extends GenericPlugin {
 		$parsedWhatsappNumber = $this->parseWhatsappNumber($request->getUserVar('whatsappNumber'));
 		$this->setPendingWhatsappNumber($request, $parsedWhatsappNumber['value']);
 		if ($parsedWhatsappNumber['value'] === null) {
-			$form->addError('whatsappNumber', 'plugins.generic.whatsappNumber.fieldRequired');
+			$form->addError('whatsappNumber', __('plugins.generic.whatsappNumber.fieldRequired'));
 			$form->addErrorField('whatsappNumber');
 		} elseif (!$parsedWhatsappNumber['isValid']) {
-			$form->addError('whatsappNumber', 'plugins.generic.whatsappNumber.fieldInvalid');
+			$form->addError('whatsappNumber', __('plugins.generic.whatsappNumber.fieldInvalid'));
 			$form->addErrorField('whatsappNumber');
 		}
 
