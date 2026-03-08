@@ -17,13 +17,9 @@ Nomor WhatsApp:
 
 ### Form Submission
 
-Tambahkan screenshot ke file `docs/preview-submission.png`
-
 ![Preview Form Submission](docs/preview-submission.png)
 
 ### Tab Workflow Editor
-
-Tambahkan screenshot ke file `docs/preview-workflow.png`
 
 ![Preview Tab Workflow Editor](docs/preview-workflow.png)
 
