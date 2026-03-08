@@ -1,0 +1,14 @@
+msgid "plugins.generic.whatsappNumber.displayName"
+msgstr "WhatsApp Number"
+
+msgid "plugins.generic.whatsappNumber.description"
+msgstr "Add an internal WhatsApp number field to submission step 1 and a dedicated editor workflow tab."
+
+msgid "plugins.generic.whatsappNumber.fieldLabel"
+msgstr "WhatsApp Number"
+
+msgid "plugins.generic.whatsappNumber.fieldDescription"
+msgstr "Masukkan nomor WhatsApp yang aktif. Nomor ini tidak dipublikasikan dan hanya digunakan secara internal untuk korespondensi antara editor dan penulis."
+
+msgid "plugins.generic.whatsappNumber.fieldRequired"
+msgstr "A WhatsApp number is required."
