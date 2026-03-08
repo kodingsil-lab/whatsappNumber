@@ -12,3 +12,6 @@ msgstr "Masukkan nomor WhatsApp yang aktif. Nomor ini tidak dipublikasikan dan h
 
 msgid "plugins.generic.whatsappNumber.fieldRequired"
 msgstr "Nomor WhatsApp wajib diisi."
+
+msgid "plugins.generic.whatsappNumber.fieldInvalid"
+msgstr "Format nomor WhatsApp tidak valid. Gunakan hanya angka dengan awalan + jika diperlukan."
