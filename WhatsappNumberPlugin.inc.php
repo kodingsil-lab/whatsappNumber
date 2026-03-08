@@ -83,7 +83,16 @@ class WhatsappNumberPlugin extends GenericPlugin {
 			$whatsappNumber = trim((string) $request->getUserVar('whatsappNumber'));
 		}
 
+		$whatsappNumberError = '';
+		if (method_exists($form, 'getErrorsArray')) {
+			$errors = $form->getErrorsArray();
+			if (!empty($errors['whatsappNumber'])) {
+				$whatsappNumberError = (string) $errors['whatsappNumber'];
+			}
+		}
+
 		$templateMgr->assign('whatsappNumber', $whatsappNumber);
+		$templateMgr->assign('whatsappNumberError', $whatsappNumberError);
 		$additionalFormContent = (string) $templateMgr->getTemplateVars('additionalFormContent1');
 		$additionalFormContent .= $templateMgr->fetch($this->getTemplateResource('whatsappField.tpl'));
 		$templateMgr->assign('additionalFormContent1', $additionalFormContent);
@@ -105,10 +114,8 @@ class WhatsappNumberPlugin extends GenericPlugin {
 		$this->setPendingWhatsappNumber($request, $parsedWhatsappNumber['value']);
 		if ($parsedWhatsappNumber['value'] === null) {
 			$form->addError('whatsappNumber', __('plugins.generic.whatsappNumber.fieldRequired'));
-			$form->addErrorField('whatsappNumber');
 		} elseif (!$parsedWhatsappNumber['isValid']) {
 			$form->addError('whatsappNumber', __('plugins.generic.whatsappNumber.fieldInvalid'));
-			$form->addErrorField('whatsappNumber');
 		}
 
 		return false;
