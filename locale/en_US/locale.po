@@ -8,7 +8,7 @@ msgid "plugins.generic.whatsappNumber.fieldLabel"
 msgstr "WhatsApp Number"
 
 msgid "plugins.generic.whatsappNumber.fieldDescription"
-msgstr "Masukkan nomor WhatsApp yang aktif. Nomor ini tidak dipublikasikan dan hanya digunakan secara internal untuk korespondensi antara editor dan penulis."
+msgstr "Please enter an active WhatsApp number. This will not be published and is only used internally for correspondence between editors and authors."
 
 msgid "plugins.generic.whatsappNumber.fieldRequired"
 msgstr "A WhatsApp number is required."
