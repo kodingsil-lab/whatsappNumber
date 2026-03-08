@@ -40,6 +40,8 @@ class WhatsappNumberPlugin extends GenericPlugin {
 			return false;
 		}
 
+		$this->addLocaleData();
+
 		// If the system isn't installed, or is performing an upgrade, don't register hooks.
 		if (!Config::getVar('general', 'installed') || defined('RUNNING_UPGRADE')) {
 			return true;
